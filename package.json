@@ -1,66 +1,67 @@
 {
-  "name": "redux-unity-router",
-  "version": "1.4.1",
-  "description": "Redux router that syncs history with store",
-  "main": "dist/index.js",
-  "scripts": {
-    "build": "npm run test && npm run clean && ./node_modules/.bin/babel src --out-dir dist",
-    "build:watch": "npm run clean && ./node_modules/.bin/babel src --out-dir dist -s -w",
-    "clean": "./node_modules/.bin/rimraf dist",
-    "commit": "./node_modules/.bin/git-cz",
-    "coverage:report": "./node_modules/.bin/nyc report",
-    "coverage:send": "./node_modules/.bin/nyc report --reporter=text-lcov | ./node_modules/.bin/coveralls",
-    "lint": "./node_modules/.bin/eslint --ignore-path=.gitignore --fix ./src",
-    "lint-prod": "NODE_ENV='production' npm run lint",
-    "version": " ./node_modules/.bin/conventional-changelog -i CHANGELOG.md -s && git add CHANGELOG.md",
-    "prepublish": "npm run build",
-    "precommit": "npm test",
-    "commitmsg": "./node_modules/.bin/validate-commit-msg",
-    "test": "npm run lint-prod && ./node_modules/.bin/nyc ./node_modules/.bin/ava --verbose",
-    "test:watch": "npm run lint && ./node_modules/.bin/nyc ./node_modules/.bin/ava --verbose --watch"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:auru/redux-unity-router.git"
-  },
-  "engines": {
-    "node": ">=8"
-  },
-  "keywords": [
-    "history",
-    "react",
-    "redux",
-    "router",
-    "unity"
-  ],
-  "author": "Vitaliy Blinovskov (blinovskov@yandex-team.ru)",
-  "publishConfig": {
-    "registry": "https://registry.npmjs.org/"
-  },
-  "license": "MIT",
-  "dependencies": {
-    "history": "^4.7.2",
-    "path": "^0.12.7",
-    "path-to-regexp": "^1.7.0",
-    "query-string": "^4.3.4",
-    "url": "^0.11.0"
-  },
-  "devDependencies": {
-    "commitizen": "^2.9.6",
-    "conventional-changelog-cli": "^1.3.4",
-    "coveralls": "^2.13.1",
-    "cz-conventional-changelog": "^2.1.0",
-    "husky": "^0.14.3",
-    "jsdom": "^11.3.0",
-    "nyc": "^11.2.1",
-    "prop-types": "^15.5.10",
-    "react": "^15.6.2",
-    "rimraf": "^2.6.2",
-    "validate-commit-msg": "^2.14.0"
-  },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
-  }
+	"name": "redux-unity-router",
+	"version": "1.4.1",
+	"description": "Redux router that syncs history with store",
+	"main": "dist/index.js",
+	"scripts": {
+		"build": "npm run clean && tsc",
+		"build:prod": "npm run test & npm run build",
+		"build:watch": "npm run build -- --watch",
+		"clean": "rimraf dist",
+		"commit": "git-cz",
+		"coverage:send": "cat coverage/lcov.info | coveralls",
+		"lint": "tslint -c tslint.json 'src/**/*.ts'",
+		"lint:fix": "npm run lint -- --fix",
+		"version":
+			"conventional-changelog -i CHANGELOG.md -s && git add CHANGELOG.md",
+		"prepublish": "npm run build",
+		"precommit": "npm test",
+		"commitmsg": "validate-commit-msg",
+		"test": "npm run lint && jest -c=config/jest/index.js --coverage",
+		"test:watch": "npm run lint && nyc ava --verbose --watch"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git@github.com:auru/redux-unity-router.git"
+	},
+	"engines": {
+		"node": ">=8"
+	},
+	"keywords": ["history", "react", "redux", "router", "unity"],
+	"author": "Vitaliy Blinovskov (blinovskov@yandex-team.ru)",
+	"publishConfig": {
+		"registry": "https://registry.npmjs.org/"
+	},
+	"license": "MIT",
+	"dependencies": {
+		"history": "^4.7.2",
+		"path": "^0.12.7",
+		"path-to-regexp": "^1.7.0",
+		"query-string": "^4.3.4",
+		"tslint": "^5.8.0",
+		"url": "^0.11.0"
+	},
+	"devDependencies": {
+		"commitizen": "^2.9.6",
+		"conventional-changelog-cli": "^1.3.4",
+		"coveralls": "^2.13.1",
+		"cz-conventional-changelog": "^2.1.0",
+		"husky": "^0.14.3",
+		"jest": "^21.2.1",
+		"jsdom": "^11.3.0",
+		"nyc": "^11.2.1",
+		"prettier": "=1.7.4",
+		"prop-types": "^15.5.10",
+		"react": "^15.6.2",
+		"rimraf": "^2.6.2",
+		"ts-jest": "^21.1.4",
+		"tslint-react": "^3.2.0",
+		"typescript": "^2.5.3",
+		"validate-commit-msg": "^2.14.0"
+	},
+	"config": {
+		"commitizen": {
+			"path": "./node_modules/cz-conventional-changelog"
+		}
+	}
 }
