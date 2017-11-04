@@ -5,137 +5,84 @@ import { Route, RouteProcessed } from '../types';
 export const initialRoutes: Route[] = [
 	{
 		id: 'index',
-		pattern: '/',
+		path: '/',
 		routes: [
 			{
 				id: 'main',
-				pattern: '/main/',
+				path: '/main/',
 				data: {
 					pageTitle: 'test',
 				},
 				routes: [
 					{
-						id: 'main+param+query',
-						pattern: {
-							path: '/:param',
-							query: {
-								param: 'val',
-							},
-						},
-					},
-					{
 						id: 'main+param',
-						pattern: '/:param',
+						path: '/:param',
 						data: {
-							token: 'e287f992d8af8fa21c08',
+							pageTitle: 'title',
 						},
 					},
 					{
-						id: 'main+query',
-						pattern: {
-							query: {
-								param: 'val',
-							},
+						path: '/:param2',
+						data: {
+							token: 'my token',
 						},
 					},
 				],
 			},
 			{
 				id: 'test',
-				pattern: '/test/',
+				path: '/test/',
 			},
 			{
-				pattern: '/empty/',
-			},
-			{
-				pattern: {
-					query: {
-						param: 'val',
-					},
-				},
+				path: '/empty/',
 			},
 		],
+	},
+	{
+		id: 'second',
+		path: '/sec/',
 	},
 ];
 
 export const expectedRoutes: RouteProcessed[] = [
 	{
-		id: 'main+param+query',
-		idPath: ['index', 'main', 'main+param+query'].join(ID_DELIM),
-		pattern: {
-			path: '/main/:param',
-			query: {
-				param: 'val',
-			},
-		},
-		data: {
-			pageTitle: 'test',
-		},
-	},
-	{
-		// id: 'main+query',
-		// idPath: ['index', 'main', 'main+param+query'].join(ID_DELIM),
-		// pattern: {
-		// 	path: '/main/:param',
-		// 	query: {
-		// 		param: 'val',
-		// 	},
-		// },
-		// data: {
-		// 	pageTitle: 'test',
-		// },
-	},
-	{
 		id: 'main+param',
-		idPath: ['index', 'main', 'main+param'].join(ID_DELIM),
-		pattern: {
-			path: '/main/:param',
+		path: '/main/:param',
+		data: {
+			pageTitle: 'title',
 		},
+	},
+	{
+		path: '/main/:param2',
 		data: {
 			pageTitle: 'test',
-			token: 'e287f992d8af8fa21c08',
+			token: 'my token',
 		},
 	},
 	{
 		id: 'main',
-		idPath: ['index', 'main'].join(ID_DELIM),
-		pattern: {
-			path: '/main/',
-		},
+		path: '/main/',
 		data: {
 			pageTitle: 'test',
 		},
 	},
 	{
 		id: 'test',
-		idPath: ['index', 'test'].join(ID_DELIM),
-		pattern: {
-			path: '/test/',
-		},
+		path: '/test/',
 		data: {},
 	},
 	{
-		id: '/empty/',
-		idPath: ['index', '/empty/'].join(ID_DELIM),
-		pattern: {
-			path: '/empty/',
-		},
+		path: '/empty/',
 		data: {},
 	},
 	{
 		id: 'index',
-		idPath: 'index',
-		pattern: {
-			path: '/',
-		},
+		path: '/',
 		data: {},
 	},
 	{
-		// id: 'index',
-		// idPath: 'index',
-		// pattern: {
-		// 	path: '/',
-		// },
-		// data: {},
+		id: 'second',
+		path: '/sec/',
+		data: {},
 	},
 ];

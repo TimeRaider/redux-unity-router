@@ -1,54 +1,73 @@
 import { join as pathJoin } from 'path';
-import { ID_DELIM } from '../constants';
-import { Route, RouteProcessed, PatternObj } from '../types';
+import { Route, RouteProcessed } from '../types';
 import RouterError from '../error';
 
 type FlattenRoutes = (
 	routes: Route[],
-	parentRoutePath?: string,
-	parentIdPath?: string,
+	parentRoutePath?: Route['path'],
 	parentData?: Route['data'],
 ) => RouteProcessed[];
 
 export const flattenRoutes: FlattenRoutes = (
 	routes,
 	parentRoutePath = '',
-	parentIdPath = '',
 	parentData = {},
 ) =>
 	routes.reduce((prev: RouteProcessed[], route) => {
-		if (route.pattern === undefined) {
+		if (route.path === undefined) {
 			throw new RouterError(
-				`No pattern defined for route ${JSON.stringify(route)}`,
+				`No path defined for route ${JSON.stringify(route)}`,
 			);
 		}
 
-		const pattern: PatternObj =
-			typeof route.pattern === 'string'
-				? { path: route.pattern }
-				: route.pattern;
-		const path: string = pathJoin(parentRoutePath, pattern.path || '');
-		const id = String(route.id) || path;
-		const data = route.data || {};
-		const idPath = [parentIdPath, id].filter(i => i !== '').join(ID_DELIM);
-		const res = Array.isArray(route.routes)
-			? [...prev, ...flattenRoutes(route.routes, path, idPath, data)]
-			: prev;
-
-		const item: RouteProcessed = {
-			id,
-			idPath,
-			data: {
-				...parentData,
-				...data,
-			},
-			...{
-				pattern: {
-					...pattern,
-					path,
-				},
-			},
+		const path: Route['path'] = pathJoin(parentRoutePath, route.path);
+		const data: Route['data'] = {
+			...parentData,
+			...(route.data || {}),
 		};
 
-		return [...res, item];
+		const processedRoute: RouteProcessed = {
+			id: route.id,
+			path: pathJoin(parentRoutePath, route.path),
+			data,
+		};
+
+		const res = Array.isArray(route.routes)
+			? [...prev, ...flattenRoutes(route.routes, path, data)]
+			: prev;
+
+		return [...res, processedRoute];
 	}, []);
+
+type FindDuplicateRoutes = (
+	routes: RouteProcessed[],
+) => [RouteProcessed, RouteProcessed] | false;
+
+export const findDuplicateRoutes: FindDuplicateRoutes = routes => {
+	const paths = routes.map(({ path }) => path);
+	for (let path of paths) {
+		const firstIndex = paths.indexOf(path);
+		const lastIndex = paths.lastIndexOf(path);
+		if (firstIndex !== lastIndex) {
+			return [routes[firstIndex], routes[lastIndex]];
+		}
+	}
+	return false;
+};
+
+type ThrowIfhasDuplicateRoutes = (routes: RouteProcessed[]) => void | never;
+
+export const throwIfhasDuplicateRoutes: ThrowIfhasDuplicateRoutes = routes => {
+	const duplicateRoutes = findDuplicateRoutes(routes);
+
+	if (duplicateRoutes) {
+		throw new RouterError(
+			`Routes 
+				${JSON.stringify(duplicateRoutes[0])} 
+				and 
+				${JSON.stringify(duplicateRoutes[1])}
+				have idential paths
+			`,
+		);
+	}
+};

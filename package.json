@@ -18,7 +18,7 @@
 		"commitmsg": "validate-commit-msg",
 		"test": "jest -c=config/jest/index.js",
 		"test:prod": "npm run lint && npm test -- --coverage",
-		"test:watch": "npm run lint && nyc ava --verbose --watch"
+		"test:watch": "npm run lint && npm test -- --watch"
 	},
 	"repository": {
 		"type": "git",
