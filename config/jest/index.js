@@ -7,7 +7,7 @@ module.exports = {
 	collectCoverageFrom: ['src/**/*.{ts,tsx}'],
 	//setupFiles: [resolve(__dirname, 'setup/index.js')],
 	testPathIgnorePatterns: [
-		'<rootDir>[/\\\\](build|docs|node_modules|examples)[/\\\\]',
+		'<rootDir>[/\\\\](build|docs|node_modules|examples|dist)[/\\\\]',
 	],
 	transform: {
 		'^.+\\.tsx?$': '<rootDir>/node_modules/ts-jest/preprocessor.js',

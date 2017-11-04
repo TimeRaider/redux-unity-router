@@ -16,7 +16,14 @@
 		"strictNullChecks": true,
 		"alwaysStrict": true
 	},
-	"exclude": ["node_modules", "dist", "coverage"],
+	"exclude": [
+		"node_modules",
+		"dist",
+		"coverage",
+		"**/*.test.ts",
+		"**/*.spec.ts",
+		"tests"
+	],
 	"types": ["@types"],
 	"traceResolution": true
 }

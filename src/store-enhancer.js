@@ -1,49 +1,57 @@
 import * as actions from './actions';
 
-const createInitialState = ({state, slice, val, immutable}) => {
-    if (immutable) {
-        state = state.set(slice, require('immutable').fromJS(val));
-    } else {
-        state[slice] = val;
-    }
-    return state;
+const createInitialState = ({ state, slice, val, immutable }) => {
+	if (immutable) {
+		state = state.set(slice, require('immutable').fromJS(val));
+	} else {
+		state[slice] = val;
+	}
+	return state;
 };
 
 const scrollToHash = hash => {
-    if (hash && window && typeof window.requestAnimationFrame === 'function') {
-        window.requestAnimationFrame(() => {
-            const node = document.getElementById(location.hash.substr(1));
-            if (node) {
-                node.scrollIntoView();
-            }
-        });
-    }
+	if (hash && window && typeof window.requestAnimationFrame === 'function') {
+		window.requestAnimationFrame(() => {
+			const node = document.getElementById(location.hash.substr(1));
+			if (node) {
+				node.scrollIntoView();
+			}
+		});
+	}
 };
 
-export default ({ history, slice, locationParser, immutable }) => next => (reducer, initialState, enhancer) => {
+export default ({ history, slice, locationParser, immutable }) => next => (
+	reducer,
+	initialState,
+	enhancer,
+) => {
+	// boilerplate
+	if (typeof initialState === 'function' && typeof enhancer === 'undefined') {
+		enhancer = initialState;
+		initialState = undefined;
+	}
+	let newInitialState = initialState || enhancer;
 
-    // boilerplate
-    if (typeof initialState === 'function' && typeof enhancer === 'undefined') {
-        enhancer = initialState;
-        initialState = undefined;
-    }
-    let newInitialState = initialState || enhancer;
+	const initialLocation = locationParser(history.location);
 
-    const initialLocation = locationParser(history.location);
+	scrollToHash(initialLocation.hash);
 
-    scrollToHash(initialLocation.hash);
+	newInitialState = createInitialState({
+		state: newInitialState,
+		val: initialLocation,
+		slice,
+		immutable,
+	});
 
-    newInitialState = createInitialState({ state: newInitialState, val: initialLocation, slice, immutable });
+	const store = next(reducer, newInitialState, enhancer);
 
-    const store = next(reducer, newInitialState, enhancer);
+	history.listen(location => {
+		if (location.silent) return;
 
-    history.listen(location => {
-        if (location.silent) return;
+		store.dispatch(actions.locationChange(location));
 
-        store.dispatch(actions.locationChange(location));
+		scrollToHash(location.hash);
+	});
 
-        scrollToHash(location.hash);
-    });
-
-    return store;
+	return store;
 };
