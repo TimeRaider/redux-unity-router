@@ -1,8 +1,18 @@
-export const ACTION_PREFIX: string = '@@REDUX_UNITY_ROUTER';
+import { History } from 'history';
 
-export const ACTION_TYPES: {
-	[x: string]: string;
-} = {
+export const ACTION_PREFIX: '@@REDUX_UNITY_ROUTER' = '@@REDUX_UNITY_ROUTER';
+
+interface ActionTypes {
+	LOCATION_CHANGED: string;
+	PUSH: string;
+	REPLACE: string;
+	GO: string;
+	GO_BACK: string;
+	GO_FORWARD: string;
+	GO_TO_ROUTE: string;
+}
+
+export const ACTION_TYPES: ActionTypes = {
 	LOCATION_CHANGED: `${ACTION_PREFIX}/LOCATION_CHANGED`,
 	PUSH: `${ACTION_PREFIX}/PUSH`,
 	REPLACE: `${ACTION_PREFIX}/REPLACE`,
@@ -13,7 +23,7 @@ export const ACTION_TYPES: {
 };
 
 export const HISTORY_METHODS: {
-	[x: string]: string;
+	[x: string]: keyof History;
 } = {
 	[ACTION_TYPES.PUSH]: 'push',
 	[ACTION_TYPES.REPLACE]: 'replace',
@@ -22,8 +32,5 @@ export const HISTORY_METHODS: {
 	[ACTION_TYPES.GO_FORWARD]: 'goForward',
 };
 
-export const __DEV__: boolean = process.env.NODE_ENV === 'development';
-
-export const ID_DELIM: string = ':';
-
-export const DEFAULT_SLICE: string = 'router';
+export const SLICE: string = 'router';
+export const CACHE_SIZE: number = 1000;

@@ -1,12 +1,12 @@
-import {
-	flattenRoutes,
-	findDuplicateRoutes,
-	throwIfhasDuplicateRoutes,
-} from '../../src/parsers/util';
+import { PathFunction } from 'path-to-regexp';
+import flattenRoutes from '../../src/utils/flatten-routes';
+import findDuplicateRoutes from '../../src/utils/find-duplicate-routes';
+import throwIfhasDuplicateRoutes from '../../src/utils/throw-if-has-duplicate-routes';
+import createParamsFromKeys from '../../src/utils/create-params-from-keys';
+
 import { Route } from '../../src/types';
 import { initialRoutes, expectedRoutes } from './routes';
 
-// should work for route with id ${expectedRoutes[index].id}`;
 describe('utils', () => {
 	describe('flattenRoutes', () => {
 		const flatRoutes = flattenRoutes(initialRoutes);
@@ -67,6 +67,16 @@ describe('utils', () => {
 				},
 			]);
 			expect(() => throwIfhasDuplicateRoutes(routes)).toThrow();
+		});
+	});
+
+	describe('createParamsFromKeys', () => {
+		const match = ['1/2/3', 1, 2, 3];
+		const keys = [{ name: 'one' }, { name: 'two' }, { name: 'three' }];
+		expect(createParamsFromKeys(match, keys)).toEqual({
+			one: 1,
+			two: 2,
+			three: 3,
 		});
 	});
 });
