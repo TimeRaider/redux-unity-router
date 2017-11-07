@@ -2,13 +2,16 @@ import { compile, PathFunction, Key } from 'path-to-regexp';
 import * as pathToRegexp from 'path-to-regexp';
 import { parse as qsParse, stringify as qsStringify } from 'query-string';
 import { createLocation, createPath, Location } from 'history';
-import { Route, RouteProcessed } from './types';
+import { Route, RouteProcessed, Params } from './types';
 import RouterError from './error';
+import { SLICE } from './constants';
 
 import flattenRoutes from './utils/flatten-routes';
 import createParamsFromKeys from './utils/create-params-from-keys';
 
 export class Registry {
+	slice: string;
+
 	private paths: RouteProcessed['path'][] = [];
 	private idToPath: { [id: string]: RouteProcessed['path'] } = {};
 	private routes: {
@@ -20,7 +23,8 @@ export class Registry {
 		};
 	} = {};
 
-	public constructor(routes: Route[]) {
+	public constructor(routes: Route[], slice?: string) {
+		this.slice = slice || SLICE;
 		flattenRoutes(routes).forEach((route, index) => {
 			this.paths[index] = route.path;
 			if (route.id) {
@@ -39,22 +43,22 @@ export class Registry {
 		return this;
 	}
 
-	public locationToState(location: string) {
-		const locationObject = createLocation(location);
-		const query = qsParse(locationObject.search);
-		const state = locationObject.state || {};
-		const route = this.locationToRoute(locationObject);
+	public pathToState(path: string) {
+		const location = createLocation(path);
+		const query = qsParse(location.search);
+		const state = location.state || {};
+		const route = this.locationToRoute(location);
 
 		return {
-			...locationObject,
-			location,
+			...location,
+			path,
 			query,
 			state,
 			route,
 		};
 	}
 
-	public routeToLocation(
+	public routeToPath(
 		id: string,
 		params: {} = {},
 		query: {} = {},
@@ -81,17 +85,14 @@ export class Registry {
 		return createPath(location);
 	}
 
-	private getPathById(id: string): string | never {
-		const path = this.idToPath[id];
-		if (path === undefined) {
-			throw new RouterError(`Can't find route with id "${id}"`);
-		}
-		return path;
-	}
-
-	private locationToRoute(location: Location) {
-		const path = this.findPathByLocation(location);
-		const params = this.getPathParams(path, location);
+	private locationToRoute(
+		location: Location,
+	): RouteProcessed & {
+		path: RouteProcessed['path'];
+		params: Params;
+	} {
+		const path = this.getPathByLocation(location);
+		const params = this.getParams(path, location);
 
 		return {
 			...this.routes[path].route,
@@ -100,15 +101,20 @@ export class Registry {
 		};
 	}
 
-	private getPathParams(
-		path: Route['path'],
-		location: Location,
-	): { [x: string]: {} } {
+	private getParams(path: Route['path'], location: Location): Params {
 		const match = this.routes[path].regexp.exec(location.pathname);
 		return createParamsFromKeys(match as string[], this.routes[path].keys);
 	}
 
-	private findPathByLocation(location: Location): string | never {
+	private getPathById(id: string): string | never {
+		const path = this.idToPath[id];
+		if (path === undefined) {
+			throw new RouterError(`Can't find route with id "${id}"`);
+		}
+		return path;
+	}
+
+	private getPathByLocation(location: Location): string | never {
 		const path = this.paths.find(p =>
 			this.routes[p].regexp.test(location.pathname),
 		);
@@ -124,22 +130,22 @@ export class Registry {
 
 const registry = new Registry([{ id: 'test', path: '/test/:foo?' }]);
 const states = [
-	registry.locationToState('/test/'),
-	registry.locationToState('/test/hey'),
-	registry.locationToState('/test/you?test=what'),
-	registry.locationToState('/test/you?test=what#yo'),
+	registry.pathToState('/test/'),
+	registry.pathToState('/test/hey'),
+	registry.pathToState('/test/you?test=what'),
+	registry.pathToState('/test/you?test=what#yo'),
 ];
 const paths = [
-	registry.routeToLocation('test'),
-	registry.routeToLocation('test', { foo: 'bar' }),
-	registry.routeToLocation('test', { hey: 'test' }),
-	registry.routeToLocation('test', {}, { q: 'ya' }),
-	registry.routeToLocation('test', {}, { q: 'ya' }, 'hash'),
-	registry.routeToLocation(
+	registry.routeToPath('test'),
+	registry.routeToPath('test', { foo: 'bar' }),
+	registry.routeToPath('test', { hey: 'test' }),
+	registry.routeToPath('test', {}, { q: 'ya' }),
+	registry.routeToPath('test', {}, { q: 'ya' }, 'hash'),
+	registry.routeToPath(
 		'test',
 		{ foo: 'bar', hey: 'test' },
 		{ q: 'ya' },
 		'hash',
 	),
 ];
-// debugger;
+debugger;

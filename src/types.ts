@@ -9,10 +9,6 @@ export interface RouteProcessed extends Route {
 	routes?: never;
 }
 
-export interface RouteNew extends Route {
-	path: never;
-	pattern: {
-		path?: string;
-		query?: string;
-	};
+export interface Params {
+	[x: string]: string;
 }

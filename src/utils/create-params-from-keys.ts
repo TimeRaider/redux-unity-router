@@ -1,9 +1,10 @@
 import { Key } from 'path-to-regexp';
+import { Params } from '../types';
 
 type CreateParamsFromKeys = (
 	match: (string | number)[],
 	keys: { name: Key['name'] }[],
-) => { [x: string]: {} };
+) => Params;
 
 const createParamsFromKeys: CreateParamsFromKeys = (match, keys) => {
 	return keys.reduce(
