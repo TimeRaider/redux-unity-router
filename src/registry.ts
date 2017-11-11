@@ -1,18 +1,23 @@
 import { compile, PathFunction, Key } from 'path-to-regexp';
 import * as pathToRegexp from 'path-to-regexp';
-import { parse as qsParse, stringify as qsStringify } from 'query-string';
+import {
+	parse as qsParse,
+	stringify as qsStringify,
+	StringifyOptions,
+} from 'query-string';
 import { createLocation, createPath, Location, History } from 'history';
 
 import flattenRoutes from './utils/flatten-routes';
 import createParamsFromKeys from './utils/create-params-from-keys';
+import ensureQuestionMark from './utils/ensure-question-mark';
 import { Route, RouteProcessed, Query, Payload } from './types';
 import RouterError from './error';
 import { SLICE } from './constants';
 
-export class Registry {
+export default class Registry {
 	public slice: string;
 	public history?: History;
-
+	private qsOptions: StringifyOptions;
 	private paths: RouteProcessed['path'][] = [];
 	private idToPath: { [id: string]: RouteProcessed['path'] } = {};
 	private routes: {
@@ -24,9 +29,14 @@ export class Registry {
 		};
 	} = {};
 
-	public constructor(routes: Route[], slice?: string) {
-		this.slice = slice || SLICE;
-		flattenRoutes(routes).forEach((route, index) => {
+	public constructor(params: {
+		routes: Route[];
+		slice?: string;
+		queryStringOptions?: StringifyOptions;
+	}) {
+		this.slice = params.slice || SLICE;
+		this.qsOptions = params.queryStringOptions || {};
+		flattenRoutes(params.routes).forEach((route, index) => {
 			this.paths[index] = route.path;
 			if (route.id) {
 				this.idToPath[route.id] = route.path;
@@ -48,7 +58,7 @@ export class Registry {
 	public pathToPayload(path: string): Payload {
 		const location = createLocation(path);
 		const route = this.locationToRoute(location);
-		const query: Query = qsParse(location.search);
+		const query: Query = qsParse(location.search, this.qsOptions);
 		const state: Object = {
 			...route.state,
 			...(location.state || {}),
@@ -66,7 +76,7 @@ export class Registry {
 	public routeToPath(
 		id: string,
 		params: {} = {},
-		query: {} = {},
+		query: Query | string = {},
 		hash: string = '',
 	) {
 		const path = this.getPathById(id);
@@ -82,9 +92,12 @@ export class Registry {
 		}
 
 		const location = {
-			search: qsStringify(query),
+			search:
+				typeof query === 'string'
+					? ensureQuestionMark(query)
+					: qsStringify(query, this.qsOptions),
+			hash: hash.replace('#', ''),
 			pathname,
-			hash,
 		};
 
 		return createPath(location);
@@ -131,25 +144,3 @@ export class Registry {
 		return path;
 	}
 }
-
-const registry = new Registry([{ id: 'test', path: '/test/:foo?' }]);
-const states = [
-	registry.pathToPayload('/test/'),
-	registry.pathToPayload('/test/hey'),
-	registry.pathToPayload('/test/you?test=what'),
-	registry.pathToPayload('/test/you?test=what#yo'),
-];
-const paths = [
-	registry.routeToPath('test'),
-	registry.routeToPath('test', { foo: 'bar' }),
-	registry.routeToPath('test', { hey: 'test' }),
-	registry.routeToPath('test', {}, { q: 'ya' }),
-	registry.routeToPath('test', {}, { q: 'ya' }, 'hash'),
-	registry.routeToPath(
-		'test',
-		{ foo: 'bar', hey: 'test' },
-		{ q: 'ya' },
-		'hash',
-	),
-];
-debugger;

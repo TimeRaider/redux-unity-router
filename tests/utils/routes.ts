@@ -10,20 +10,20 @@ export const initialRoutes: Route[] = [
 			{
 				id: 'main',
 				path: '/main/',
-				data: {
+				state: {
 					pageTitle: 'test',
 				},
 				routes: [
 					{
 						id: 'main+param',
 						path: '/:param',
-						data: {
+						state: {
 							pageTitle: 'title',
 						},
 					},
 					{
 						path: '/:param2',
-						data: {
+						state: {
 							token: 'my token',
 						},
 					},
@@ -48,13 +48,13 @@ export const expectedRoutes: RouteProcessed[] = [
 	{
 		id: 'main+param',
 		path: '/main/:param',
-		data: {
+		state: {
 			pageTitle: 'title',
 		},
 	},
 	{
 		path: '/main/:param2',
-		data: {
+		state: {
 			pageTitle: 'test',
 			token: 'my token',
 		},
@@ -62,27 +62,27 @@ export const expectedRoutes: RouteProcessed[] = [
 	{
 		id: 'main',
 		path: '/main/',
-		data: {
+		state: {
 			pageTitle: 'test',
 		},
 	},
 	{
 		id: 'test',
 		path: '/test/',
-		data: {},
+		state: {},
 	},
 	{
 		path: '/empty/',
-		data: {},
+		state: {},
 	},
 	{
 		id: 'index',
 		path: '/',
-		data: {},
+		state: {},
 	},
 	{
 		id: 'second',
 		path: '/sec/',
-		data: {},
+		state: {},
 	},
 ];
