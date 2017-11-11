@@ -6,13 +6,13 @@ import throwIfDuplicate from './throw-if-has-duplicate-routes';
 type FlattenRoutes = (
 	routes: Route[],
 	parentRoutePath?: Route['path'],
-	parentData?: Route['data'],
+	parentState?: Route['state'],
 ) => RouteProcessed[] | never;
 
 const flattenRoutes: FlattenRoutes = (
 	routes,
 	parentRoutePath = '',
-	parentData = {},
+	parentState = Object,
 ) => {
 	const processedRoutes = routes.reduce((prev: RouteProcessed[], route) => {
 		if (!route.path) {
@@ -22,19 +22,19 @@ const flattenRoutes: FlattenRoutes = (
 		}
 
 		const path: Route['path'] = pathJoin(parentRoutePath, route.path);
-		const data: Route['data'] = {
-			...parentData,
-			...(route.data || {}),
+		const state: Route['state'] = {
+			...parentState,
+			...(route.state || {}),
 		};
 
 		const processedRoute: RouteProcessed = {
 			id: route.id,
 			path: pathJoin(parentRoutePath, route.path),
-			data,
+			state,
 		};
 
 		const res = route.routes
-			? [...prev, ...flattenRoutes(route.routes, path, data)]
+			? [...prev, ...flattenRoutes(route.routes, path, state)]
 			: prev;
 
 		return [...res, processedRoute];

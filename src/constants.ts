@@ -33,4 +33,3 @@ export const HISTORY_METHODS: {
 };
 
 export const SLICE: string = 'router';
-export const CACHE_SIZE: number = 1000;

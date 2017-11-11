@@ -1,14 +1,19 @@
-import { ACTION_TYPES } from './constants';
+import { ACTION_TYPES } from '../constants';
+import { Payload } from '../types';
 
-export default ({ locationParser, immutable }) => (
-	state = immutable ? require('immutable').fromJS({}) : {},
-	{ type, payload },
-) => {
-	if (type === ACTION_TYPES.LOCATION_CHANGED) {
-		const result = locationParser(payload);
+type Reducer = (
+	state: Object,
+	action: {
+		type: string;
+		payload: Payload;
+	},
+) => Object;
 
-		return immutable ? require('immutable').fromJS(result) : result;
+const reducer: Reducer = (state: {}, { type, payload }) => {
+	if (type === ACTION_TYPES.LOCATION_CHANGE) {
+		return payload;
 	}
-
 	return state;
 };
+
+export default reducer;

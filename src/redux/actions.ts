@@ -1,5 +1,6 @@
 import { Location } from 'history';
 import { ACTION_TYPES } from '../constants';
+import { Payload } from '../types';
 
 export const push = (payload: string | Location) => ({
 	type: ACTION_TYPES.PUSH,
@@ -34,7 +35,7 @@ export const goToRoute = (payload: {
 	payload,
 });
 
-export const locationChange = payload => ({
+export const locationChange = (payload: Payload) => ({
 	type: ACTION_TYPES.LOCATION_CHANGE,
 	payload,
 });

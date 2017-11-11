@@ -1,16 +1,17 @@
 import { compile, PathFunction, Key } from 'path-to-regexp';
 import * as pathToRegexp from 'path-to-regexp';
 import { parse as qsParse, stringify as qsStringify } from 'query-string';
-import { createLocation, createPath, Location } from 'history';
-import { Route, RouteProcessed, Params } from './types';
-import RouterError from './error';
-import { SLICE } from './constants';
+import { createLocation, createPath, Location, History } from 'history';
 
 import flattenRoutes from './utils/flatten-routes';
 import createParamsFromKeys from './utils/create-params-from-keys';
+import { Route, RouteProcessed, Query, Payload } from './types';
+import RouterError from './error';
+import { SLICE } from './constants';
 
 export class Registry {
-	slice: string;
+	public slice: string;
+	public history?: History;
 
 	private paths: RouteProcessed['path'][] = [];
 	private idToPath: { [id: string]: RouteProcessed['path'] } = {};
@@ -32,6 +33,7 @@ export class Registry {
 			}
 
 			const keys: Key[] = [];
+			// keys is modified by pathToRegexp
 			const regexp = pathToRegexp(route.path, keys);
 			this.routes[route.path] = {
 				fn: compile(route.path),
@@ -43,18 +45,21 @@ export class Registry {
 		return this;
 	}
 
-	public pathToState(path: string) {
+	public pathToPayload(path: string): Payload {
 		const location = createLocation(path);
-		const query = qsParse(location.search);
-		const state = location.state || {};
 		const route = this.locationToRoute(location);
+		const query: Query = qsParse(location.search);
+		const state: Object = {
+			...route.state,
+			...(location.state || {}),
+		};
 
 		return {
 			...location,
+			...route,
 			path,
 			query,
 			state,
-			route,
 		};
 	}
 
@@ -88,8 +93,7 @@ export class Registry {
 	private locationToRoute(
 		location: Location,
 	): RouteProcessed & {
-		path: RouteProcessed['path'];
-		params: Params;
+		params: {};
 	} {
 		const path = this.getPathByLocation(location);
 		const params = this.getParams(path, location);
@@ -101,7 +105,7 @@ export class Registry {
 		};
 	}
 
-	private getParams(path: Route['path'], location: Location): Params {
+	private getParams(path: Route['path'], location: Location): {} {
 		const match = this.routes[path].regexp.exec(location.pathname);
 		return createParamsFromKeys(match as string[], this.routes[path].keys);
 	}
@@ -130,10 +134,10 @@ export class Registry {
 
 const registry = new Registry([{ id: 'test', path: '/test/:foo?' }]);
 const states = [
-	registry.pathToState('/test/'),
-	registry.pathToState('/test/hey'),
-	registry.pathToState('/test/you?test=what'),
-	registry.pathToState('/test/you?test=what#yo'),
+	registry.pathToPayload('/test/'),
+	registry.pathToPayload('/test/hey'),
+	registry.pathToPayload('/test/you?test=what'),
+	registry.pathToPayload('/test/you?test=what#yo'),
 ];
 const paths = [
 	registry.routeToPath('test'),
