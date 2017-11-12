@@ -13,6 +13,13 @@ import ensureQuestionMark from './utils/ensure-question-mark';
 import { SLICE, Route, RouteProcessed, Query, Actions } from './constants';
 import RouterError from './error';
 
+export interface RegistryParams {
+	routes: Route[];
+	history: History;
+	slice?: string;
+	queryStringOptions?: StringifyOptions;
+}
+
 export default class Registry {
 	public slice: string;
 	public history: History;
@@ -28,12 +35,7 @@ export default class Registry {
 		};
 	} = {};
 
-	public constructor(params: {
-		routes: Route[];
-		history: History;
-		slice?: string;
-		queryStringOptions?: StringifyOptions;
-	}) {
+	public constructor(params: RegistryParams) {
 		this.history = params.history;
 		this.slice = params.slice || SLICE;
 		this.qsOptions = params.queryStringOptions || {};

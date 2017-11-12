@@ -34,6 +34,9 @@
 		"registry": "https://registry.npmjs.org/"
 	},
 	"license": "MIT",
+	"peerDependencies": {
+		"history": "^4.7.2"
+	},
 	"dependencies": {
 		"history": "^4.7.2",
 		"path-to-regexp": "^2.1.0",
