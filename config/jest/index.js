@@ -17,4 +17,5 @@ module.exports = {
 	testURL: 'http://localhost',
 	transformIgnorePatterns: ['[/\\\\]node_modules[/\\\\].+\\.(js|jsx)$'],
 	testRegex: '(/__tests__/.*|\\.?(test|spec))\\.(ts|tsx|js)$',
+	mapCoverage: true,
 };

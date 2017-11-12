@@ -1,7 +1,9 @@
 export default class RouterError extends Error {
-	constructor(message?: string) {
+	public name: 'RouterError' = 'RouterError';
+	public message: string;
+
+	constructor(message: string = '') {
 		super(message);
-		this.name = 'RouterError';
-		this.message = message || '';
+		this.message = message;
 	}
 }

@@ -12,12 +12,13 @@
 		"coverage:send": "cat coverage/lcov.info | coveralls",
 		"lint": "tslint -c tslint.json 'src/**/*.ts'",
 		"lint:fix": "npm run lint -- --fix",
-		"version": "conventional-changelog -i CHANGELOG.md -s && git add CHANGELOG.md",
+		"version":
+			"conventional-changelog -i CHANGELOG.md -s && git add CHANGELOG.md",
 		"prepublish": "npm run build",
 		"precommit": "npm test",
 		"commitmsg": "validate-commit-msg",
 		"test": "jest -c=config/jest/index.js",
-		"test:prod": "npm run lint && npm test -- --coverage",
+		"test:prod": "rimraf coverage && npm run lint && npm test -- --coverage",
 		"test:watch": "npm run lint && npm test -- --watch"
 	},
 	"repository": {
@@ -27,13 +28,7 @@
 	"engines": {
 		"node": ">=8"
 	},
-	"keywords": [
-		"history",
-		"react",
-		"redux",
-		"router",
-		"unity"
-	],
+	"keywords": ["history", "react", "redux", "router", "unity"],
 	"author": "Vitaliy Blinovskov (blinovskov@yandex-team.ru)",
 	"publishConfig": {
 		"registry": "https://registry.npmjs.org/"
