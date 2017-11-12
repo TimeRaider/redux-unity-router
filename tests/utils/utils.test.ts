@@ -5,7 +5,7 @@ import findDuplicateRoutes from '../../src/utils/find-duplicate-routes';
 import throwIfhasDuplicateRoutes from '../../src/utils/throw-if-has-duplicate-routes';
 import createParamsFromKeys from '../../src/utils/create-params-from-keys';
 import ensureQuestionMark from '../../src/utils/ensure-question-mark';
-import createLocation from '../../src/utils/create-location';
+import ensureLocation from '../../src/utils/ensure-location';
 
 import { Route } from '../../src/constants';
 import { initialRoutes, expectedRoutes } from './routes';
@@ -100,7 +100,7 @@ describe('utils', () => {
 		});
 	});
 
-	describe('createLocation', () => {
+	describe('ensureLocation', () => {
 		const location = {
 			pathname: '/test/',
 			search: '',
@@ -112,11 +112,11 @@ describe('utils', () => {
 		});
 
 		test('creates location from path', () => {
-			createLocation('/test/');
+			ensureLocation('/test/');
 			expect(spy).toHaveBeenCalledTimes(1);
 		});
 		test('returns locationif passed', () => {
-			createLocation({ pathname: '/test/', search: '', hash: '', state: {} });
+			ensureLocation({ pathname: '/test/', search: '', hash: '', state: {} });
 			expect(spy).not.toHaveBeenCalled();
 		});
 	});

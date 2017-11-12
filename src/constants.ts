@@ -26,6 +26,7 @@ export namespace ActionTypes {
 	export type GoForward = '@@REDUX_UNITY_ROUTER/GO_FORWARD';
 	export type GoToRoute = '@@REDUX_UNITY_ROUTER/GO_TO_ROUTE';
 	export type LocationChange = '@@REDUX_UNITY_ROUTER/LOCATION_CHANGE';
+	export type SetRoutes = '@@REDUX_UNITY_ROUTER/SET_ROUTES';
 
 	export const PUSH: Push = '@@REDUX_UNITY_ROUTER/PUSH';
 	export const REPLACE: Replace = '@@REDUX_UNITY_ROUTER/REPLACE';
@@ -35,6 +36,7 @@ export namespace ActionTypes {
 	export const GO_TO_ROUTE: GoToRoute = '@@REDUX_UNITY_ROUTER/GO_TO_ROUTE';
 	export const LOCATION_CHANGE: LocationChange =
 		'@@REDUX_UNITY_ROUTER/LOCATION_CHANGE';
+	export const SET_ROUTES: SetRoutes = '@@REDUX_UNITY_ROUTER/SET_ROUTES';
 }
 
 export namespace Actions {
@@ -102,8 +104,19 @@ export namespace Actions {
 		type: ActionTypes.LocationChange;
 		payload: Payload;
 	}
-	export const locationChange = (payload: LocationChange['payload']) => ({
+	export const locationChange = (
+		payload: LocationChange['payload'],
+	): LocationChange => ({
 		type: ActionTypes.LOCATION_CHANGE,
+		payload,
+	});
+
+	export interface SetRoutes extends Action {
+		type: ActionTypes.SetRoutes;
+		payload: Route[];
+	}
+	export const setRoutes = (payload: SetRoutes['payload']): SetRoutes => ({
+		type: ActionTypes.SET_ROUTES,
 		payload,
 	});
 }
