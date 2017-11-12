@@ -1,11 +1,13 @@
 import { PathFunction } from 'path-to-regexp';
+import * as hstry from 'history/PathUtils';
 import flattenRoutes from '../../src/utils/flatten-routes';
 import findDuplicateRoutes from '../../src/utils/find-duplicate-routes';
 import throwIfhasDuplicateRoutes from '../../src/utils/throw-if-has-duplicate-routes';
 import createParamsFromKeys from '../../src/utils/create-params-from-keys';
 import ensureQuestionMark from '../../src/utils/ensure-question-mark';
+import createLocation from '../../src/utils/create-location';
 
-import { Route } from '../../src/types';
+import { Route } from '../../src/constants';
 import { initialRoutes, expectedRoutes } from './routes';
 
 describe('utils', () => {
@@ -32,9 +34,11 @@ describe('utils', () => {
 			const routes = [
 				{
 					path: 'one',
+					state: {},
 				},
 				{
 					path: 'two',
+					state: {},
 				},
 			];
 
@@ -50,21 +54,26 @@ describe('utils', () => {
 			const routes = [
 				{
 					path: 'one',
+					state: {},
 				},
 				{
 					path: 'second',
+					state: {},
 				},
 				{
 					path: 'one',
+					state: {},
 				},
 			];
 
 			expect(findDuplicateRoutes(routes)).toEqual([
 				{
 					path: 'one',
+					state: {},
 				},
 				{
 					path: 'one',
+					state: {},
 				},
 			]);
 			expect(() => throwIfhasDuplicateRoutes(routes)).toThrow();
@@ -88,6 +97,27 @@ describe('utils', () => {
 
 		test('without question mark', () => {
 			expect(ensureQuestionMark('test')).toBe('?test');
+		});
+	});
+
+	describe('createLocation', () => {
+		const location = {
+			pathname: '/test/',
+			search: '',
+			hash: '',
+		};
+		let spy;
+		beforeEach(() => {
+			spy = spyOn(hstry, 'parsePath');
+		});
+
+		test('creates location from path', () => {
+			createLocation('/test/');
+			expect(spy).toHaveBeenCalledTimes(1);
+		});
+		test('returns locationif passed', () => {
+			createLocation({ pathname: '/test/', search: '', hash: '', state: {} });
+			expect(spy).not.toHaveBeenCalled();
 		});
 	});
 });

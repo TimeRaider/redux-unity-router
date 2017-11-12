@@ -7,7 +7,7 @@ type CreateParamsFromKeys = (
 
 const createParamsFromKeys: CreateParamsFromKeys = (match, keys) => {
 	return keys.reduce(
-		(result: {}, key, index) => ({
+		(result, key, index) => ({
 			...result,
 			[key.name]: match[index + 1],
 		}),
