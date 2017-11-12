@@ -37,8 +37,12 @@ export default class Registry {
 		this.history = params.history;
 		this.slice = params.slice || SLICE;
 		this.qsOptions = params.queryStringOptions || {};
+		this.setRoutes(params.routes);
+		return this;
+	}
 
-		flattenRoutes(params.routes).forEach((route, index) => {
+	public setRoutes(routes: Route[]): this {
+		flattenRoutes(routes).forEach((route, index) => {
 			this.paths[index] = route.path;
 			if (route.id) {
 				this.idToPath[route.id] = route.path;
@@ -57,7 +61,9 @@ export default class Registry {
 		return this;
 	}
 
-	public pathToPayload(path: string): Actions.LocationChange['payload'] {
+	public pathToPayload(
+		path: string | Location,
+	): Actions.LocationChange['payload'] {
 		const location = createLocation(path);
 		const route = this.locationToRoute(location);
 		const query: Query = qsParse(location.search, this.qsOptions);
@@ -69,7 +75,7 @@ export default class Registry {
 		return {
 			...location,
 			...route,
-			path,
+			path: typeof path === 'string' ? path : createPath(path),
 			query,
 			state,
 		};
