@@ -1,36 +1,84 @@
-import { ACTION_PREFIX, ACTION_TYPES, HISTORY_METHODS } from '../constants';
+import { Middleware, AnyAction, Action } from 'redux';
+import {
+	ACTION_PREFIX,
+	ActionTypes,
+	HistoryMethods,
+	Actions,
+} from '../constants';
 import { parsePath } from 'history';
+import Registry from '../registry';
+// import reducer from './reducer';
 
-export default Registry => ({ dispatch, getState }) => next => action => {
+// type ConvertGoToRouteIntoPush = <T extends Action>(
+// 	action: T,
+// 	registry: Registry,
+// ) => T | Actions.Push;
+// const convertGoToRouteIntoPush: ConvertGoToRouteIntoPush = (
+// 	action,
+// 	registry,
+// ) => {
+// 	return action && action.type === ActionTypes.GO_TO_ROUTE
+// 		? ({
+// 				type: ActionTypes.PUSH,
+// 				payload: registry.routeToPath(action.payload),
+// 			} as Actions.Push)
+// 		: action;
+// };
+
+type RouterAction =
+	| Actions.Push
+	| Actions.Replace
+	| Actions.Go
+	| Actions.GoForward
+	| Actions.GoBack
+	| Actions.GoToRoute
+	| Actions.LocationChange;
+
+type CreateMiddleware = (registry: Registry) => Middleware;
+const middleware: CreateMiddleware = registry => ({
+	dispatch,
+	getState,
+}) => next => originalAction => {
 	if (
-		action.type.startsWith(ACTION_PREFIX) &&
-		action.type !== ACTION_TYPES.LOCATION_CHANGED
+		originalAction.type !== ActionTypes.PUSH &&
+		originalAction.type !== ActionTypes.REPLACE &&
+		originalAction.type !== ActionTypes.GO &&
+		originalAction.type !== ActionTypes.GO_FORWARD &&
+		originalAction.type !== ActionTypes.GO_BACK &&
+		originalAction.type !== ActionTypes.GO_TO_ROUTE &&
+		originalAction.type !== ActionTypes.LOCATION_CHANGE
 	) {
-		if (action.type === ACTION_TYPES.GO_TO_ROUTE) {
-			action.type = ACTION_TYPES.PUSH;
-			action.payload = routeParser(action.payload);
-		}
-
-		if ([ACTION_TYPES.PUSH, ACTION_TYPES.REPLACE].includes(action.type)) {
-			action.payload =
-				typeof action.payload === 'string'
-					? parsePath(action.payload)
-					: action.payload;
-
-			const isSameLocation =
-				history.location.pathname === action.payload.pathname &&
-				history.location.search === action.payload.search &&
-				history.location.hash === action.payload.hash;
-
-			action.type = isSameLocation ? ACTION_TYPES.REPLACE : action.type;
-		}
-
-		if (HISTORY_METHODS[action.type]) {
-			history[HISTORY_METHODS[action.type]](action.payload);
-		}
-
-		return;
+		return next(originalAction);
 	}
 
-	return next(action); // eslint-disable-line consistent-return
+	let action: RouterAction = originalAction as RouterAction;
+
+	if (action.type === ActionTypes.GO_TO_ROUTE) {
+		action = {
+			type: ActionTypes.PUSH,
+			payload: action.payload && registry.routeToPath(action.payload),
+		};
+	}
+
+	if (action.type === ActionTypes.PUSH || action.type === ActionTypes.REPLACE) {
+		action.payload =
+			typeof action.payload === 'string'
+				? parsePath(action.payload)
+				: action.payload;
+		action.type =
+			registry.history.location.pathname === action.payload.pathname &&
+			registry.history.location.search === action.payload.search &&
+			registry.history.location.hash === action.payload.hash
+				? ActionTypes.REPLACE
+				: action.type;
+	}
+
+	if (HistoryMethods[action.type]) {
+		const historyMethod = registry.history[HistoryMethods[action.type]];
+		historyMethod(action.payload);
+	}
+
+	return next(action as typeof originalAction);
 };
+
+export default middleware;

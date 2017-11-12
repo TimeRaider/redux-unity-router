@@ -60,6 +60,7 @@
 		"prettier": "^1.8.2",
 		"prop-types": "^15.6.0",
 		"react": "^15.6.2",
+		"redux": "^3.7.2",
 		"rimraf": "^2.6.2",
 		"ts-jest": "^21.2.1",
 		"tslint-react": "^3.2.0",

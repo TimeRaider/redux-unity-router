@@ -1,4 +1,4 @@
-import { RouteProcessed } from '../types';
+import { RouteProcessed } from '../constants';
 
 type FindDuplicateRoutes = (
 	routes: RouteProcessed[],

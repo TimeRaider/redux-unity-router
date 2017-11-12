@@ -1,5 +1,5 @@
 import { join as pathJoin } from 'path';
-import { Route, RouteProcessed } from '../types';
+import { Route, RouteProcessed } from '../constants';
 import RouterError from '../error';
 import throwIfDuplicate from './throw-if-has-duplicate-routes';
 
@@ -7,7 +7,7 @@ type FlattenRoutes = (
 	routes: Route[],
 	parentRoutePath?: Route['path'],
 	parentState?: Route['state'],
-) => RouteProcessed[] | never;
+) => RouteProcessed[];
 
 const flattenRoutes: FlattenRoutes = (
 	routes,

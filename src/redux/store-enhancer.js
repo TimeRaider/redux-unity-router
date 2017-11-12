@@ -9,17 +9,6 @@ const createInitialState = ({ state, slice, val, immutable }) => {
 	return state;
 };
 
-const scrollToHash = hash => {
-	if (hash && window && typeof window.requestAnimationFrame === 'function') {
-		window.requestAnimationFrame(() => {
-			const node = document.getElementById(location.hash.substr(1));
-			if (node) {
-				node.scrollIntoView();
-			}
-		});
-	}
-};
-
 export default ({ history, slice, locationParser, immutable }) => next => (
 	reducer,
 	initialState,

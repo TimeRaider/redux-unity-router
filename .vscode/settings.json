@@ -53,4 +53,5 @@
 	"prettier.graphqlEnable": ["graphql"],
 	"tslint.configFile": "tslint.json",
 	"tslint.autoFixOnSave": true
+	//"coverage-gutters.lcovname": "coverage/lcov.info"
 }

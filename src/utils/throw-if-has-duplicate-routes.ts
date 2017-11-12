@@ -1,4 +1,4 @@
-import { RouteProcessed } from '../types';
+import { RouteProcessed } from '../constants';
 import RouterError from '../error';
 import findDuplicateRoutes from './find-duplicate-routes';
 

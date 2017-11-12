@@ -10,13 +10,12 @@ import { createLocation, createPath, Location, History } from 'history';
 import flattenRoutes from './utils/flatten-routes';
 import createParamsFromKeys from './utils/create-params-from-keys';
 import ensureQuestionMark from './utils/ensure-question-mark';
-import { Route, RouteProcessed, Query, Payload } from './types';
+import { SLICE, Route, RouteProcessed, Query, Actions } from './constants';
 import RouterError from './error';
-import { SLICE } from './constants';
 
 export default class Registry {
 	public slice: string;
-	public history?: History;
+	public history: History;
 	private qsOptions: StringifyOptions;
 	private paths: RouteProcessed['path'][] = [];
 	private idToPath: { [id: string]: RouteProcessed['path'] } = {};
@@ -31,11 +30,14 @@ export default class Registry {
 
 	public constructor(params: {
 		routes: Route[];
+		history: History;
 		slice?: string;
 		queryStringOptions?: StringifyOptions;
 	}) {
+		this.history = params.history;
 		this.slice = params.slice || SLICE;
 		this.qsOptions = params.queryStringOptions || {};
+
 		flattenRoutes(params.routes).forEach((route, index) => {
 			this.paths[index] = route.path;
 			if (route.id) {
@@ -55,7 +57,7 @@ export default class Registry {
 		return this;
 	}
 
-	public pathToPayload(path: string): Payload {
+	public pathToPayload(path: string): Actions.LocationChange['payload'] {
 		const location = createLocation(path);
 		const route = this.locationToRoute(location);
 		const query: Query = qsParse(location.search, this.qsOptions);
@@ -73,12 +75,12 @@ export default class Registry {
 		};
 	}
 
-	public routeToPath(
-		id: string,
-		params: {} = {},
-		query: Query | string = {},
-		hash: string = '',
-	) {
+	public routeToPath({
+		id,
+		params = {},
+		query = {},
+		hash = '',
+	}: Actions.GoToRoute['payload']) {
 		const path = this.getPathById(id);
 		const pathFunction = this.routes[path].fn;
 		let pathname;
@@ -123,7 +125,7 @@ export default class Registry {
 		return createParamsFromKeys(match as string[], this.routes[path].keys);
 	}
 
-	private getPathById(id: string): string | never {
+	private getPathById(id: string): string {
 		const path = this.idToPath[id];
 		if (path === undefined) {
 			throw new RouterError(`Can't find route with id "${id}"`);
@@ -131,7 +133,7 @@ export default class Registry {
 		return path;
 	}
 
-	private getPathByLocation(location: Location): string | never {
+	private getPathByLocation(location: Location): string {
 		const path = this.paths.find(p =>
 			this.routes[p].regexp.test(location.pathname),
 		);
