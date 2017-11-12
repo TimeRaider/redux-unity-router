@@ -12,7 +12,7 @@ type FlattenRoutes = (
 const flattenRoutes: FlattenRoutes = (
 	routes,
 	parentRoutePath = '',
-	parentState = Object,
+	parentState = {},
 ) => {
 	const processedRoutes = routes.reduce((prev: RouteProcessed[], route) => {
 		if (!route.path) {

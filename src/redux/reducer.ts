@@ -1,8 +1,8 @@
 import { ActionTypes, Actions } from '../constants';
 
-type Reducer = (state: Object, action: Actions.LocationChange) => Object;
+type Reducer = (state: {}, action: Actions.LocationChange) => {};
 
-const reducer: Reducer = (state: {}, { type, payload }) => {
+const reducer: Reducer = (state = {}, { type, payload }) => {
 	if (type === ActionTypes.LOCATION_CHANGE) {
 		return payload;
 	}

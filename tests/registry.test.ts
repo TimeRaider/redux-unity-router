@@ -1,11 +1,13 @@
 import Registry from '../src/registry';
+import { createMemoryHistory } from 'history';
+import createBrowserHistory from 'history/createBrowserHistory';
 
 describe('Registry', () => {
 	const routes = [{ id: 'myId', path: '/path/:param?' }];
 	let registry;
 
 	beforeEach(() => {
-		registry = new Registry({ routes });
+		registry = new Registry({ routes, history: createMemoryHistory() });
 	});
 
 	describe('pathToPayload', () => {
@@ -106,64 +108,77 @@ describe('Registry', () => {
 
 	describe('routeToPath', () => {
 		test('id only', () => {
-			expect(registry.routeToPath('myId')).toBe('/path');
+			expect(registry.routeToPath({ id: 'myId' })).toBe('/path');
 		});
 
 		test('id and param', () => {
-			expect(registry.routeToPath('myId', { param: 'bar' })).toBe('/path/bar');
+			expect(
+				registry.routeToPath({ id: 'myId', params: { param: 'bar' } }),
+			).toBe('/path/bar');
 		});
 
 		test('id and non-existent param', () => {
-			expect(registry.routeToPath('myId', { bar: 'baz' })).toBe('/path');
-		});
-
-		test('id and query', () => {
-			expect(registry.routeToPath('myId', {}, { key: 'val' })).toBe(
-				'/path?key=val',
+			expect(registry.routeToPath({ id: 'myId', params: { bar: 'baz' } })).toBe(
+				'/path',
 			);
 		});
 
-		test('id and query as string', () => {
-			expect(registry.routeToPath('myId', {}, 'key=val')).toBe('/path?key=val');
-			expect(registry.routeToPath('myId', {}, '?key=val')).toBe(
+		test('id and query', () => {
+			expect(registry.routeToPath({ id: 'myId', query: { key: 'val' } })).toBe(
 				'/path?key=val',
 			);
 		});
 
 		test('id, query and hash', () => {
-			expect(registry.routeToPath('myId', {}, { key: 'val' }, 'hash')).toBe(
-				'/path?key=val#hash',
+			expect(
+				registry.routeToPath({
+					id: 'myId',
+					query: { key: 'val' },
+					hash: 'hash',
+				}),
+			).toBe('/path?key=val#hash');
+		});
+
+		test('id and query as string', () => {
+			expect(registry.routeToPath({ id: 'myId', query: 'key=val' })).toBe(
+				'/path?key=val',
+			);
+			expect(registry.routeToPath({ id: 'myId', query: '?key=val' })).toBe(
+				'/path?key=val',
 			);
 		});
 
 		test('id and query array default', () => {
-			expect(registry.routeToPath('myId', {}, { key: ['val1', 'val2'] })).toBe(
-				'/path?key=val1&key=val2',
-			);
+			expect(
+				registry.routeToPath({ id: 'myId', query: { key: ['val1', 'val2'] } }),
+			).toBe('/path?key=val1&key=val2');
 		});
 
 		test('id and query array as brackets', () => {
 			registry = new Registry({
 				routes,
+				history: createMemoryHistory(),
 				queryStringOptions: { arrayFormat: 'bracket' },
 			});
-			expect(registry.routeToPath('myId', {}, { key: ['val1', 'val2'] })).toBe(
-				'/path?key[]=val1&key[]=val2',
-			);
+			expect(
+				registry.routeToPath({ id: 'myId', query: { key: ['val1', 'val2'] } }),
+			).toBe('/path?key[]=val1&key[]=val2');
 		});
 
 		test('id and hash', () => {
-			expect(registry.routeToPath('myId', {}, {}, '#hash')).toBe('/path#hash');
+			expect(registry.routeToPath({ id: 'myId', hash: '#hash' })).toBe(
+				'/path#hash',
+			);
 		});
 
 		test('id, params, query and hash', () => {
 			expect(
-				registry.routeToPath(
-					'myId',
-					{ param: 'bar', baz: 'qux' },
-					{ key: 'val' },
-					'hash',
-				),
+				registry.routeToPath({
+					id: 'myId',
+					params: { param: 'bar', baz: 'qux' },
+					query: { key: 'val' },
+					hash: 'hash',
+				}),
 			).toBe('/path/bar?key=val#hash');
 		});
 	});

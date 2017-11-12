@@ -45,7 +45,7 @@ export default class Registry {
 			}
 
 			const keys: Key[] = [];
-			// keys is modified by pathToRegexp
+			// keys is mutable and modified by pathToRegexp
 			const regexp = pathToRegexp(route.path, keys);
 			this.routes[route.path] = {
 				fn: compile(route.path),
@@ -61,7 +61,7 @@ export default class Registry {
 		const location = createLocation(path);
 		const route = this.locationToRoute(location);
 		const query: Query = qsParse(location.search, this.qsOptions);
-		const state: Object = {
+		const state: {} = {
 			...route.state,
 			...(location.state || {}),
 		};

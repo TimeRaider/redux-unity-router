@@ -1,84 +1,63 @@
-import { Middleware, AnyAction, Action } from 'redux';
-import {
-	ACTION_PREFIX,
-	ActionTypes,
-	HistoryMethods,
-	Actions,
-} from '../constants';
-import { parsePath } from 'history';
+import { Middleware } from 'redux';
+import { ActionTypes, Actions } from '../constants';
 import Registry from '../registry';
-// import reducer from './reducer';
+import createLocation from '../utils/create-location';
 
-// type ConvertGoToRouteIntoPush = <T extends Action>(
-// 	action: T,
-// 	registry: Registry,
-// ) => T | Actions.Push;
-// const convertGoToRouteIntoPush: ConvertGoToRouteIntoPush = (
-// 	action,
-// 	registry,
-// ) => {
-// 	return action && action.type === ActionTypes.GO_TO_ROUTE
-// 		? ({
-// 				type: ActionTypes.PUSH,
-// 				payload: registry.routeToPath(action.payload),
-// 			} as Actions.Push)
-// 		: action;
-// };
-
-type RouterAction =
+type RouterHistoryAction =
 	| Actions.Push
 	| Actions.Replace
 	| Actions.Go
 	| Actions.GoForward
 	| Actions.GoBack
-	| Actions.GoToRoute
-	| Actions.LocationChange;
+	| Actions.GoToRoute;
 
-type CreateMiddleware = (registry: Registry) => Middleware;
-const middleware: CreateMiddleware = registry => ({
-	dispatch,
-	getState,
-}) => next => originalAction => {
-	if (
-		originalAction.type !== ActionTypes.PUSH &&
-		originalAction.type !== ActionTypes.REPLACE &&
-		originalAction.type !== ActionTypes.GO &&
-		originalAction.type !== ActionTypes.GO_FORWARD &&
-		originalAction.type !== ActionTypes.GO_BACK &&
-		originalAction.type !== ActionTypes.GO_TO_ROUTE &&
-		originalAction.type !== ActionTypes.LOCATION_CHANGE
-	) {
-		return next(originalAction);
-	}
+const createMiddleware = (registry: Registry): Middleware => () => {
+	// general for helper functions
+	type ActionToAction = (action: RouterHistoryAction) => RouterHistoryAction;
 
-	let action: RouterAction = originalAction as RouterAction;
+	const convertActionGoToRouteIntoPush: ActionToAction = action =>
+		action.type === ActionTypes.GO_TO_ROUTE
+			? {
+					type: ActionTypes.PUSH,
+					payload: registry.routeToPath(action.payload),
+				}
+			: action;
 
-	if (action.type === ActionTypes.GO_TO_ROUTE) {
-		action = {
-			type: ActionTypes.PUSH,
-			payload: action.payload && registry.routeToPath(action.payload),
-		};
-	}
+	const callHistoryMethod: ActionToAction = action => {
+		const { push, replace, go, goForward, goBack } = registry.history;
+		switch (action.type) {
+			case ActionTypes.PUSH:
+				push(createLocation(action.payload));
+				break;
+			case ActionTypes.REPLACE:
+				replace(createLocation(action.payload));
+				break;
+			case ActionTypes.GO:
+				go(action.payload);
+				break;
+			case ActionTypes.GO_FORWARD:
+				goForward();
+				break;
+			case ActionTypes.GO_BACK:
+				goBack();
+				break;
+			default:
+				break;
+		}
+		return action;
+	};
 
-	if (action.type === ActionTypes.PUSH || action.type === ActionTypes.REPLACE) {
-		action.payload =
-			typeof action.payload === 'string'
-				? parsePath(action.payload)
-				: action.payload;
-		action.type =
-			registry.history.location.pathname === action.payload.pathname &&
-			registry.history.location.search === action.payload.search &&
-			registry.history.location.hash === action.payload.hash
-				? ActionTypes.REPLACE
-				: action.type;
-	}
-
-	if (HistoryMethods[action.type]) {
-		const historyMethod = registry.history[HistoryMethods[action.type]];
-		historyMethod(action.payload);
-	}
-
-	return next(action as typeof originalAction);
+	return next => action =>
+		action.type !== ActionTypes.PUSH &&
+		action.type !== ActionTypes.REPLACE &&
+		action.type !== ActionTypes.GO &&
+		action.type !== ActionTypes.GO_FORWARD &&
+		action.type !== ActionTypes.GO_BACK &&
+		action.type !== ActionTypes.GO_TO_ROUTE
+			? next(action)
+			: next(callHistoryMethod(
+					convertActionGoToRouteIntoPush(action),
+				) as typeof action);
 };
 
-export default middleware;
+export default createMiddleware;
